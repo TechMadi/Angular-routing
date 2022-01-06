@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { Product } from './product';
-import { ProductService } from './product.service';
+import { Product } from '../product';
+import { ProductService } from '../service/product.service';
 
 @Component({
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.css']
+  styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent implements OnInit {
   pageTitle = 'Product List';
@@ -20,32 +21,39 @@ export class ProductListComponent implements OnInit {
   }
   set listFilter(value: string) {
     this._listFilter = value;
-    this.filteredProducts = this.listFilter ? this.performFilter(this.listFilter) : this.products;
+    this.filteredProducts = this.listFilter
+      ? this.performFilter(this.listFilter)
+      : this.products;
   }
 
   filteredProducts: Product[] = [];
   products: Product[] = [];
 
-  constructor(private productService: ProductService) { }
+  constructor(private productService: ProductService, private router: Router) {}
 
   ngOnInit(): void {
     this.productService.getProducts().subscribe({
-      next: products => {
+      next: (products) => {
         this.products = products;
         this.filteredProducts = this.performFilter(this.listFilter);
       },
-      error: err => this.errorMessage = err
+      error: (err) => (this.errorMessage = err),
     });
   }
 
   performFilter(filterBy: string): Product[] {
     filterBy = filterBy.toLocaleLowerCase();
-    return this.products.filter((product: Product) =>
-      product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1);
+    return this.products.filter(
+      (product: Product) =>
+        product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1
+    );
   }
 
   toggleImage(): void {
     this.showImage = !this.showImage;
   }
 
+  viewProduct(product) {
+    this.router.navigate([`products/${product.id}/edit`]);
+  }
 }
